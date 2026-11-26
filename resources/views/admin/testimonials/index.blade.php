@@ -4,149 +4,140 @@
 
 @section('content')
 
-<div class="container-fluid">
+    <div class="container-fluid">
 
-    <div class="page-title-head d-flex align-items-center">
+        <div class="page-title-head d-flex align-items-center">
 
-        <div class="flex-grow-1">
-            <h4 class="page-main-title m-0">
-                Testimonials
-            </h4>
+            <div class="flex-grow-1">
+                <h4 class="page-main-title m-0">
+                    Testimonials
+                </h4>
+            </div>
+
+            <a href="{{ route('admin.testimonials.create') }}" class="btn btn-primary">
+
+                <i class="ti ti-plus"></i>
+                Add Testimonial
+
+            </a>
+
         </div>
 
-        <a href="{{ route('admin.testimonials.create') }}"
-           class="btn btn-primary">
+        <div class="card">
 
-            <i class="ti ti-plus"></i>
-            Add Testimonial
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    All Testimonials
+                </h4>
+            </div>
 
-        </a>
+            <div class="card-body">
 
-    </div>
+                <div class="table-responsive">
 
-    <div class="card">
+                    <table class="table table-bordered table-striped align-middle text-center">
 
-        <div class="card-header">
-            <h4 class="card-title mb-0">
-                All Testimonials
-            </h4>
-        </div>
+                        <thead class="table-light">
 
-        <div class="card-body">
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Location</th>
+                                <th>Message</th>
+                                <th width="150">Action</th>
+                            </tr>
 
-            <div class="table-responsive">
+                        </thead>
 
-                <table class="table table-bordered table-striped align-middle text-center">
+                        <tbody>
 
-                    <thead class="table-light">
+                            @forelse($testimonials as $testimonial)
+                                <tr>
 
-                        <tr>
-                            <th>ID</th>
-                            <th>Image</th>
-                            <th>Name</th>
-                            <th>Location</th>
-                            <th>Message</th>
-                            <th width="150">Action</th>
-                        </tr>
+                                    <td>
+                                        {{ $testimonial->id }}
+                                    </td>
 
-                    </thead>
+                                    <td>
 
-                    <tbody>
+                                        @if ($testimonial->image)
+                                            <img src="{{ $testimonial->image_url }}" width="70" height="70"
+                                                style="object-fit:cover;border-radius:10px;"
+                                                onerror="this.onerror=null; this.src='{{ asset('frontend/images/profile/user.jpg') }}';">
+                                        @else
+                                            <span class="text-muted">
+                                                No Image
+                                            </span>
+                                        @endif
 
-                        @forelse($testimonials as $testimonial)
+                                    </td>
 
-                        <tr>
+                                    <td>
+                                        {{ $testimonial->name }}
+                                    </td>
 
-                            <td>
-                                {{ $testimonial->id }}
-                            </td>
+                                    <td>
+                                        {{ $testimonial->location }}
+                                    </td>
 
-                            <td>
+                                    <td style="max-width:300px;">
+                                        {{ $testimonial->message }}
+                                    </td>
 
-    @if($testimonial->image)
+                                    <td>
 
-       <img src="{{ asset('public/' . $testimonial->image) }}"
-     width="70"
-     height="70"
-     style="object-fit:cover;border-radius:10px;">
+                                        <div class="d-flex justify-content-center gap-2">
 
-    @else
-
-        <span class="text-muted">
-            No Image
-        </span>
-
-    @endif
-
-</td>
-
-                            <td>
-                                {{ $testimonial->name }}
-                            </td>
-
-                            <td>
-                                {{ $testimonial->location }}
-                            </td>
-
-                            <td style="max-width:300px;">
-                                {{ $testimonial->message }}
-                            </td>
-
-                            <td>
-
-                                <div class="d-flex justify-content-center gap-2">
-
-                                    <a href="{{ route('admin.testimonials.edit', $testimonial->id) }}"
-                                       class="btn btn-light btn-icon btn-sm rounded-circle">
-
-                                        <i class="ti ti-edit fs-lg"></i>
-
-                                    </a>
-
-                                    <form action="{{ route('admin.testimonials.destroy', $testimonial->id) }}"
-                                          method="POST">
-
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button type="submit"
-                                                onclick="return confirm('Delete this testimonial?')"
+                                            <a href="{{ route('admin.testimonials.edit', $testimonial->id) }}"
                                                 class="btn btn-light btn-icon btn-sm rounded-circle">
 
-                                            <i class="ti ti-trash fs-lg"></i>
+                                                <i class="ti ti-edit fs-lg"></i>
 
-                                        </button>
+                                            </a>
 
-                                    </form>
+                                            <form action="{{ route('admin.testimonials.destroy', $testimonial->id) }}"
+                                                method="POST">
 
-                                </div>
+                                                @csrf
+                                                @method('DELETE')
 
-                            </td>
+                                                <button type="submit" onclick="return confirm('Delete this testimonial?')"
+                                                    class="btn btn-light btn-icon btn-sm rounded-circle">
 
-                        </tr>
+                                                    <i class="ti ti-trash fs-lg"></i>
 
-                        @empty
+                                                </button>
 
-                        <tr>
+                                            </form>
 
-                            <td colspan="6">
-                                No Testimonials Found
-                            </td>
+                                        </div>
 
-                        </tr>
+                                    </td>
 
-                        @endforelse
+                                </tr>
 
-                    </tbody>
+                            @empty
 
-                </table>
+                                <tr>
+
+                                    <td colspan="6">
+                                        No Testimonials Found
+                                    </td>
+
+                                </tr>
+                            @endforelse
+
+                        </tbody>
+
+                    </table>
+
+                </div>
 
             </div>
 
         </div>
 
     </div>
-
-</div>
 
 @endsection

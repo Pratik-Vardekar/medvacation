@@ -22,24 +22,23 @@ class TestimonialController extends Controller
 
     public function store(Request $request)
     {
-       $request->validate([
-    'name' => 'required',
-    'message' => 'required',
-    'image' => 'nullable|image',
-]);
+        $request->validate([
+            'name' => 'required',
+            'message' => 'required',
+            'image' => 'nullable|image',
+        ]);
 
         $image = '';
 
-      if ($request->hasFile('image')) {
-
-    $file = $request->file('image');
-
-    $filename = time() . '_' . $file->getClientOriginalName();
-
-    $file->move(public_path('public/uploads/testimonials'), $filename);
-
-    $image = 'public/uploads/testimonials/' . $filename;
-}
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $publicDir = public_path('uploads/testimonials');
+            if (!file_exists($publicDir)) @mkdir($publicDir, 0777, true);
+            $file->move($publicDir, $filename);
+            @copy($publicDir . '/' . $filename, base_path('uploads/testimonials/' . $filename));
+            $image = 'uploads/testimonials/' . $filename;
+        }
 
         Testimonial::create([
 
@@ -62,38 +61,37 @@ class TestimonialController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    $request->validate([
-        'name' => 'required',
-        'message' => 'required',
-        'image' => 'nullable|image',
-    ]);
+    {
+        $request->validate([
+            'name' => 'required',
+            'message' => 'required',
+            'image' => 'nullable|image',
+        ]);
 
-    $testimonial = Testimonial::findOrFail($id);
+        $testimonial = Testimonial::findOrFail($id);
 
-    $image = $testimonial->image;
+        $image = $testimonial->image;
 
-   if ($request->hasFile('image')) {
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $publicDir = public_path('uploads/testimonials');
+            if (!file_exists($publicDir)) @mkdir($publicDir, 0777, true);
+            $file->move($publicDir, $filename);
+            @copy($publicDir . '/' . $filename, base_path('uploads/testimonials/' . $filename));
+            $image = 'uploads/testimonials/' . $filename;
+        }
 
-    $file = $request->file('image');
+        $testimonial->update([
+            'name' => $request->name,
+            'location' => $request->location,
+            'message' => $request->message,
+            'image' => $image,
+        ]);
 
-    $filename = time() . '_' . $file->getClientOriginalName();
-
-    $file->move(public_path('public/uploads/testimonials'), $filename);
-
-    $image = 'public/uploads/testimonials/' . $filename;
-}
-
-    $testimonial->update([
-        'name' => $request->name,
-        'location' => $request->location,
-        'message' => $request->message,
-        'image' => $image,
-    ]);
-
-    return redirect()->route('admin.testimonials.index')
-        ->with('success', 'Testimonial Updated Successfully');
-}
+        return redirect()->route('admin.testimonials.index')
+            ->with('success', 'Testimonial Updated Successfully');
+    }
     public function destroy($id)
     {
         $testimonial = Testimonial::findOrFail($id);

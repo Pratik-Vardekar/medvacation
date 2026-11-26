@@ -26,16 +26,41 @@ class SliderController extends Controller
     {
         $request->validate([
             'sr_no' => 'required|integer|unique:sliders,sr_no',
-            'image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+        ], [
+            'sr_no.required' => 'Serial number is required.',
+            'sr_no.unique' => 'This serial number is already taken.',
+            'image.required' => 'Please upload a slider image.',
+            'image.image' => 'The uploaded file must be an image.',
+            'image.mimes' => 'Allowed image formats: JPG, JPEG, PNG, WEBP.',
+            'image.max' => 'Image size must not exceed 5MB.',
         ]);
 
-        // Upload image
-        $imageName = time().'.'.$request->image->extension();
-        $request->image->move(public_path('public/uploads/sliders'), $imageName);
+        $imageName = time() . '_' . uniqid() . '.' . $request->image->getClientOriginalExtension();
+
+        // 1. Move to public/uploads/sliders
+        $publicUploadDir = public_path('uploads/sliders');
+        if (!file_exists($publicUploadDir)) {
+            @mkdir($publicUploadDir, 0777, true);
+        }
+        $request->image->move($publicUploadDir, $imageName);
+
+        // 2. Mirror copy to base_path('uploads/sliders') and public/public/uploads/sliders
+        $rootUploadDir = base_path('uploads/sliders');
+        if (!file_exists($rootUploadDir)) {
+            @mkdir($rootUploadDir, 0777, true);
+        }
+        @copy($publicUploadDir . '/' . $imageName, $rootUploadDir . '/' . $imageName);
+
+        $doublePublicDir = public_path('public/uploads/sliders');
+        if (!file_exists($doublePublicDir)) {
+            @mkdir($doublePublicDir, 0777, true);
+        }
+        @copy($publicUploadDir . '/' . $imageName, $doublePublicDir . '/' . $imageName);
 
         Slider::create([
             'sr_no' => $request->sr_no,
-            'image' => 'public/uploads/sliders/'.$imageName,
+            'image' => 'uploads/sliders/' . $imageName,
         ]);
 
         return redirect()->route('admin.slider.index')->with('success', 'Slider added successfully');
@@ -44,7 +69,7 @@ class SliderController extends Controller
     // (optional, not used)
     public function show(Slider $slider)
     {
-        return redirect()->route('slider.index');
+        return redirect()->route('admin.slider.index');
     }
 
     // Edit form
@@ -58,7 +83,13 @@ class SliderController extends Controller
     {
         $request->validate([
             'sr_no' => 'required|integer|unique:sliders,sr_no,' . $slider->id,
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+        ], [
+            'sr_no.required' => 'Serial number is required.',
+            'sr_no.unique' => 'This serial number is already taken.',
+            'image.image' => 'The uploaded file must be an image.',
+            'image.mimes' => 'Allowed image formats: JPG, JPEG, PNG, WEBP.',
+            'image.max' => 'Image size must not exceed 5MB.',
         ]);
 
         $data = [
@@ -67,16 +98,35 @@ class SliderController extends Controller
 
         // If new image uploaded
         if ($request->hasFile('image')) {
-
-            // Delete old image
-            if ($slider->image && file_exists(public_path($slider->image))) {
-                unlink(public_path($slider->image));
+            // Delete old image files safely
+            $cleanOld = ltrim(preg_replace('#^public/#', '', $slider->image ?? ''), '/');
+            if (!empty($cleanOld)) {
+                @unlink(public_path($cleanOld));
+                @unlink(base_path($cleanOld));
+                @unlink(public_path('public/' . $cleanOld));
             }
 
-            $imageName = time().'.'.$request->image->extension();
-            $request->image->move(public_path('public/uploads/sliders'), $imageName);
+            $imageName = time() . '_' . uniqid() . '.' . $request->image->getClientOriginalExtension();
 
-            $data['image'] = 'public/uploads/sliders/'.$imageName;
+            $publicUploadDir = public_path('uploads/sliders');
+            if (!file_exists($publicUploadDir)) {
+                @mkdir($publicUploadDir, 0777, true);
+            }
+            $request->image->move($publicUploadDir, $imageName);
+
+            $rootUploadDir = base_path('uploads/sliders');
+            if (!file_exists($rootUploadDir)) {
+                @mkdir($rootUploadDir, 0777, true);
+            }
+            @copy($publicUploadDir . '/' . $imageName, $rootUploadDir . '/' . $imageName);
+
+            $doublePublicDir = public_path('public/uploads/sliders');
+            if (!file_exists($doublePublicDir)) {
+                @mkdir($doublePublicDir, 0777, true);
+            }
+            @copy($publicUploadDir . '/' . $imageName, $doublePublicDir . '/' . $imageName);
+
+            $data['image'] = 'uploads/sliders/' . $imageName;
         }
 
         $slider->update($data);
@@ -87,9 +137,12 @@ class SliderController extends Controller
     // Delete slider
     public function destroy(Slider $slider)
     {
-        // Delete image
-        if ($slider->image && file_exists(public_path($slider->image))) {
-            unlink(public_path($slider->image));
+        // Delete image files safely
+        $cleanOld = ltrim(preg_replace('#^public/#', '', $slider->image ?? ''), '/');
+        if (!empty($cleanOld)) {
+            @unlink(public_path($cleanOld));
+            @unlink(base_path($cleanOld));
+            @unlink(public_path('public/' . $cleanOld));
         }
 
         $slider->delete();

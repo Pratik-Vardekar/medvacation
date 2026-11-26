@@ -4,135 +4,130 @@
 
 @section('content')
 
-<div class="container-fluid">
+    <div class="container-fluid">
 
-    <!-- Page Title -->
-    <div class="page-title-head d-flex align-items-center">
+        <!-- Page Title -->
+        <div class="page-title-head d-flex align-items-center">
 
-        <div class="flex-grow-1">
-            <h4 class="page-main-title m-0">
-                Sliders
-            </h4>
+            <div class="flex-grow-1">
+                <h4 class="page-main-title m-0">
+                    Sliders
+                </h4>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+
+                <a href="{{ route('admin.slider.create') }}" class="btn btn-primary">
+
+                    <i class="ti ti-plus"></i>
+                    Add Slider
+
+                </a>
+
+            </div>
+
         </div>
 
-        <div class="d-flex align-items-center gap-2">
+        <!-- Table -->
+        <div class="row">
 
-            <a href="{{ route('admin.slider.create') }}"
-               class="btn btn-primary">
+            <div class="col-lg-12">
 
-                <i class="ti ti-plus"></i>
-                Add Slider
+                <div class="card">
 
-            </a>
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">
+                            All Sliders
+                        </h4>
+                    </div>
 
-        </div>
+                    <div class="card-body">
 
-    </div>
+                        @if (session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
 
-    <!-- Table -->
-    <div class="row">
+                        <div class="table-responsive">
 
-        <div class="col-lg-12">
+                            <table class="table table-bordered table-striped align-middle text-center">
 
-            <div class="card">
+                                <thead class="table-light">
 
-                <div class="card-header">
-                    <h4 class="card-title mb-0">
-                        All Sliders
-                    </h4>
-                </div>
+                                    <tr>
+                                        <th width="120">Sr No</th>
+                                        <th>Image</th>
+                                        <th width="150">Action</th>
+                                    </tr>
 
-                <div class="card-body">
+                                </thead>
 
-                    @if(session('success'))
+                                <tbody>
 
-                        <div class="alert alert-success">
-                            {{ session('success') }}
-                        </div>
+                                    @forelse($sliders as $slider)
+                                        <tr>
 
-                    @endif
+                                            <td>
+                                                {{ $slider->sr_no }}
+                                            </td>
 
-                    <div class="table-responsive">
+                                            <td>
+                                                <img src="{{ $slider->image_url }}" width="120" height="70"
+                                                    style="border-radius:10px; object-fit:cover;"
+                                                    alt="Slider {{ $slider->sr_no }}"
+                                                    onerror="this.onerror=null; this.src='{{ asset('frontend/images/banner.jpg') }}';">
+                                            </td>
 
-                        <table class="table table-bordered table-striped align-middle text-center">
+                                            <td>
 
-                            <thead class="table-light">
+                                                <div class="d-flex justify-content-center align-items-center gap-2">
 
-                                <tr>
-                                    <th width="120">Sr No</th>
-                                    <th>Image</th>
-                                    <th width="150">Action</th>
-                                </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                                @forelse($sliders as $slider)
-
-                                <tr>
-
-                                    <td>
-                                        {{ $slider->sr_no }}
-                                    </td>
-
-                                   <td>
-    <img 
-        src="{{ asset('public/'.$slider->image) }}"
-        width="120"
-        height="70"
-        style="border-radius:10px; object-fit:cover;"
-    >
-</td>
-
-                                    <td>
-
-                                        <div class="d-flex justify-content-center align-items-center gap-2">
-
-                                            <a href="{{ route('admin.slider.edit', $slider->id) }}"
-                                               class="btn btn-light btn-icon btn-sm rounded-circle">
-
-                                                <i class="ti ti-edit fs-lg"></i>
-
-                                            </a>
-
-                                            <form action="{{ route('admin.slider.destroy', $slider->id) }}"
-                                                  method="POST">
-
-                                                @csrf
-                                                @method('DELETE')
-
-                                                <button type="submit"
-                                                        onclick="return confirm('Delete this slider?')"
+                                                    <a href="{{ route('admin.slider.edit', $slider->id) }}"
                                                         class="btn btn-light btn-icon btn-sm rounded-circle">
 
-                                                    <i class="ti ti-trash fs-lg "></i>
+                                                        <i class="ti ti-edit fs-lg"></i>
 
-                                                </button>
+                                                    </a>
 
-                                            </form>
+                                                    <form action="{{ route('admin.slider.destroy', $slider->id) }}"
+                                                        method="POST">
 
-                                        </div>
+                                                        @csrf
+                                                        @method('DELETE')
 
-                                    </td>
+                                                        <button type="submit"
+                                                            onclick="return confirm('Delete this slider?')"
+                                                            class="btn btn-light btn-icon btn-sm rounded-circle">
 
-                                </tr>
+                                                            <i class="ti ti-trash fs-lg "></i>
 
-                                @empty
+                                                        </button>
 
-                                <tr>
+                                                    </form>
 
-                                    <td colspan="3" class="text-center">
-                                        No sliders found
-                                    </td>
+                                                </div>
 
-                                </tr>
+                                            </td>
 
-                                @endforelse
+                                        </tr>
 
-                            </tbody>
+                                    @empty
 
-                        </table>
+                                        <tr>
+
+                                            <td colspan="3" class="text-center">
+                                                No sliders found
+                                            </td>
+
+                                        </tr>
+                                    @endforelse
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
 
                     </div>
 
@@ -143,7 +138,5 @@
         </div>
 
     </div>
-
-</div>
 
 @endsection
